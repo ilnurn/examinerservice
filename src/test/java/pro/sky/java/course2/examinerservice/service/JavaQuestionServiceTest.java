@@ -6,7 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import pro.sky.java.course2.examinerservice.domain.Question;
-import pro.sky.java.course2.examinerservice.exceptions.AmountMoreThanQuestionsNumbersException;
+import pro.sky.java.course2.examinerservice.exceptions.AmountMoreThanQuestionsNumbersOrLessOneException;
+import pro.sky.java.course2.examinerservice.exceptions.QuestionAddedYetException;
 
 import java.util.stream.Stream;
 
@@ -16,10 +17,10 @@ public class JavaQuestionServiceTest {
 
     private final JavaQuestionService out = new JavaQuestionService();
 
-    private static Stream<Arguments> provideParamsForTests(){
+    private static Stream<Arguments> provideParamsForTests() {
         return Stream.of(
                 Arguments.of(QUESTION1, ANSWER1),
-                Arguments.of(QUESTION2,ANSWER2),
+                Arguments.of(QUESTION2, ANSWER2),
                 Arguments.of(QUESTION3, ANSWER3),
                 Arguments.of(QUESTION4, ANSWER4),
                 Arguments.of(QUESTION5, ANSWER5),
@@ -30,41 +31,41 @@ public class JavaQuestionServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideParamsForTests")
-    public void ShouldAdd(String question, String answer){
-        Assertions.assertEquals(out.add(question,answer), new Question(question, answer));
+    public void shouldAdd(String question, String answer) {
+        Assertions.assertEquals(out.add(question, answer), new Question(question, answer));
     }
 
     @ParameterizedTest
     @MethodSource("provideParamsForTests")
-    public void ShouldRemove(String question, String answer){
-        Question questionObject = new Question(question, answer);
-        out.add(question,answer);
-        out.remove(questionObject);
+    public void shouldRemove(String question, String answer) {
+        out.add(question, answer);
+        out.remove(question, answer);
         Assertions.assertNull(out.getAll());
     }
 
     @Test
-    public void ShouldGetAll(){
-        out.add(QUESTION1,ANSWER1);
-        out.add(QUESTION2,ANSWER2);
-        out.add(QUESTION3,ANSWER3);
-        out.add(QUESTION4,ANSWER4);
-        out.add(QUESTION5,ANSWER5);
-        out.add(QUESTION6,ANSWER6);
-        out.add(QUESTION7,ANSWER7);
-        Assertions.assertIterableEquals(out.getAll(),ALL_QUESTIONS_AND_ANSWERS);
+    public void shouldGetAll() {
+        out.add(QUESTION1, ANSWER1);
+        out.add(QUESTION2, ANSWER2);
+        out.add(QUESTION3, ANSWER3);
+        out.add(QUESTION4, ANSWER4);
+        out.add(QUESTION5, ANSWER5);
+        out.add(QUESTION6, ANSWER6);
+        out.add(QUESTION7, ANSWER7);
+        Assertions.assertIterableEquals(out.getAll(), ALL_QUESTIONS_AND_ANSWERS);
     }
 
-    @Test
-    public void shouldThrowAmountMoreThanQuestionsNumbersException(){
-        out.add(QUESTION1,ANSWER1);
-        out.add(QUESTION2,ANSWER2);
-        out.add(QUESTION3,ANSWER3);
-        out.add(QUESTION4,ANSWER4);
-        out.add(QUESTION5,ANSWER5);
-        out.add(QUESTION6,ANSWER6);
-        out.add(QUESTION7,ANSWER7);
-        int amount = 8;
-        Assertions.assertThrows(AmountMoreThanQuestionsNumbersException.class, () -> out.getRandomQuestion(amount));
+    @ParameterizedTest
+    @MethodSource("provideParamsForTests")
+    public void shouldThrowAmountMoreThanQuestionsNumbersOrLessOneExceptionWhenAdd(String question, String answer) {
+        out.add(question, answer);
+        Assertions.assertThrows(QuestionAddedYetException.class, () -> out.add(question, answer));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideParamsForTests")
+    public void shouldThrowAmountMoreThanQuestionsNumbersOrLessOneExceptionWhenRemove(String question, String answer) {
+        out.add("вопрос", "ответ");
+        Assertions.assertThrows(QuestionAddedYetException.class, () -> out.remove(question, answer));
     }
 }
